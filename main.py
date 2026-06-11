@@ -3,9 +3,9 @@ import datetime
 import hashlib
 import os
 import time
-from playwright.sync_api import sync_playwright
 
 def capture(num_images: int, base_filename: str):
+    from playwright.sync_api import sync_playwright
     url = "https://share.earthcam.net/tJ90CoLmq7TzrY396Yd88A4kdLdbDd6oQl5D9Ktzt8U/times_square_locations/street_cam/live"
     output_dir = "captures"
     os.makedirs(output_dir, exist_ok=True)
