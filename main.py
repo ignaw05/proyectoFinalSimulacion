@@ -68,7 +68,7 @@ def hashImages():
     return "".join(hashes)
 
 def generateRandomNumberSet(seed, length: int):
-    randomNumbers = [0] * length
+    randomNumbers = []
     randomNumbers[0] = seed
     a = 61
     b = 11
@@ -76,10 +76,14 @@ def generateRandomNumberSet(seed, length: int):
     for i in range(1, length):
         randomNumbers[i] = (a * randomNumbers[i-1] + b ) % m
     
-    # Normalizamos al intervalo [0, 1) dividiendo por el módulo
-    return [x / m for x in randomNumbers]
+
+
+    #for i in range(length):
+    #    randomNumbers.append(random.randint(0, 100))
+    return randomNumbers
 
 if __name__ == "__main__":
     capture(5, "imagen")
     result = hashImages()
     print(f"Combined Hash: {result}")
+    
