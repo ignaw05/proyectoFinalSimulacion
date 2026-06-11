@@ -2,9 +2,9 @@ import datetime
 import hashlib
 import os
 import time
-from playwright.sync_api import sync_playwright
 
 def capture(num_images: int, base_filename: str):
+    from playwright.sync_api import sync_playwright
     url = "https://share.earthcam.net/tJ90CoLmq7TzrY396Yd88A4kdLdbDd6oQl5D9Ktzt8U/times_square_locations/street_cam/live"
     output_dir = "captures"
     os.makedirs(output_dir, exist_ok=True)
@@ -68,7 +68,7 @@ def hashImages():
     return "".join(hashes)
 
 def generateRandomNumberSet(seed, length: int):
-    randomNumbers = []
+    randomNumbers = [0] * length
     randomNumbers[0] = seed
     a = 61
     b = 11
@@ -76,11 +76,8 @@ def generateRandomNumberSet(seed, length: int):
     for i in range(1, length):
         randomNumbers[i] = (a * randomNumbers[i-1] + b ) % m
     
-
-
-    #for i in range(length):
-    #    randomNumbers.append(random.randint(0, 100))
-    return randomNumbers
+    # Normalizamos al intervalo [0, 1) dividiendo por el módulo
+    return [x / m for x in randomNumbers]
 
 if __name__ == "__main__":
     capture(5, "imagen")
