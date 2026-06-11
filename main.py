@@ -1,3 +1,5 @@
+import datetime
+import hashlib
 import os
 import time
 from playwright.sync_api import sync_playwright
@@ -46,5 +48,26 @@ def capture(num_images: int, base_filename: str):
                 
         browser.close()
 
+def hashImages():
+    output_dir = "captures"
+    if not os.path.exists(output_dir):
+        return ""
+    
+    hashes = []
+    # Filter png files and sort them to keep order consistent
+    files = sorted([f for f in os.listdir(output_dir) if f.lower().endswith(".png")])
+    
+    for filename in files:
+        filepath = os.path.join(output_dir, filename)
+        sha256 = hashlib.sha256()
+        with open(filepath, "rb") as f:
+            while chunk := f.read(8192):
+                sha256.update(chunk)
+        hashes.append(sha256.hexdigest())
+        
+    return "".join(hashes)
+
 if __name__ == "__main__":
     capture(5, "imagen")
+    result = hashImages()
+    print(f"Combined Hash: {result}")
