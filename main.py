@@ -67,6 +67,21 @@ def hashImages():
         
     return "".join(hashes)
 
+def generateRandomNumberSet(seed, length: int):
+    randomNumbers = []
+    randomNumbers[0] = seed
+    a = 61
+    b = 11
+    m = 180
+    for i in range(1, length):
+        randomNumbers[i] = (a * randomNumbers[i-1] + b ) % m
+    
+
+
+    #for i in range(length):
+    #    randomNumbers.append(random.randint(0, 100))
+    return randomNumbers
+
 if __name__ == "__main__":
     capture(5, "imagen")
     result = hashImages()
