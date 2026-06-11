@@ -1,3 +1,4 @@
+import subprocess
 import datetime
 import hashlib
 import os
@@ -67,22 +68,51 @@ def hashImages():
         
     return "".join(hashes)
 
+def xor_process(value):
+    value_str = value if isinstance(value, str) else str(value)
+    
+    # Ensure blockSize always produces at least 2 blocks to guarantee reduction
+    blockSize = 16
+    while blockSize >= 2 and len(value_str) // blockSize < 2:
+        blockSize //= 2
+    blockSize = max(blockSize, 1)
+    
+    blocks = [value_str[i:i+blockSize] for i in range(0, len(value_str), blockSize) if value_str[i:i+blockSize]]
+    shortened = 0
+    for block in blocks:
+        try:
+            shortened ^= int(block, 16)
+        except ValueError:
+            val = 0
+            for char in block:
+                val = (val << 8) | ord(char)
+            shortened ^= val
+    return shortened
+
 def generateRandomNumberSet(seed, length: int):
-    randomNumbers = []
-    randomNumbers[0] = seed
+    if length <= 0:
+        return []
+        
+    # Do-while: reduce the seed via XOR until it has 3 or fewer digits
+    m = 180
+    actual_seed = seed
+    while True:
+        actual_seed = xor_process(actual_seed)
+        if len(str(actual_seed)) <= 3:
+            break
+
+    randomNumbers = [actual_seed/m]
     a = 61
     b = 11
-    m = 180
-    for i in range(1, length):
-        randomNumbers[i] = (a * randomNumbers[i-1] + b ) % m
     
-
-
-    #for i in range(length):
-    #    randomNumbers.append(random.randint(0, 100))
+    for i in range(1, length):
+        next_val = (a * randomNumbers[i-1] + b) % m
+        randomNumbers.append(next_val/m)
+    
     return randomNumbers
 
 if __name__ == "__main__":
-    capture(5, "imagen")
+    #capture(5, "imagen")
     result = hashImages()
-    print(f"Combined Hash: {result}")
+    #print(f"Combined Hash: {result}")
+    print(generateRandomNumberSet(result, 180))
