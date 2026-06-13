@@ -5,6 +5,7 @@ import os
 import time
 
 def capture(num_images: int, base_filename: str):
+    # pyrefly: ignore [missing-import]
     from playwright.sync_api import sync_playwright
     url = "https://share.earthcam.net/tJ90CoLmq7TzrY396Yd88A4kdLdbDd6oQl5D9Ktzt8U/times_square_locations/street_cam/live"
     output_dir = "captures"
@@ -89,7 +90,7 @@ def xor_process(value):
             shortened ^= val
     return shortened
 
-def generateRandomNumberSet(seed, length: int):
+def generateRandomNumberSet(seed, length: int, fileName: str = "randomNumbers.csv"):
     if length <= 0:
         return []
         
@@ -101,18 +102,34 @@ def generateRandomNumberSet(seed, length: int):
         if len(str(actual_seed)) <= 3:
             break
 
-    randomNumbers = [actual_seed/m]
+    # Se realiza la relacion de recurrencia del LCG usando enteros para evitar el sesgo/convergencia.
+    # El primer elemento de la secuencia es la semilla reducida.
+    random_integers = [actual_seed]
     a = 61
     b = 11
     
     for i in range(1, length):
-        next_val = (a * randomNumbers[i-1] + b) % m
-        randomNumbers.append(next_val/m)
+        next_val = (a * random_integers[i-1] + b) % m
+        random_integers.append(next_val)
+    
+    # Convertimos los numeros en probabilidades (Ri en el rango [0, 1)) dividiendo por m.
+    # Para asegurar que todos los numeros (incluyendo la semilla si es mayor o igual a m)
+    # esten en el rango [0, 1), aplicamos modulo m antes de dividir por m.
+    randomNumbers = [(val % m) / m for val in random_integers]
+    
+    # Se exportan los numeros generados a un archivo CSV
+    with open(fileName, "w", encoding="utf-8") as f:
+        for num in randomNumbers:
+            f.write(f"{num}\n")
     
     return randomNumbers
 
-if __name__ == "__main__":
-    #capture(5, "imagen")
+def generateRandomNumberFile(fileName):
+    capture(5, "imagen")
     result = hashImages()
-    #print(f"Combined Hash: {result}")
-    print(generateRandomNumberSet(result, 180))
+    return generateRandomNumberSet(result, 406, fileName=fileName)
+
+if __name__ == "__main__":
+    generateRandomNumberFile("porcentajeACargar.csv")
+    generateRandomNumberFile("cargaInicial.csv")
+    generateRandomNumberFile("tipoAutonomia.csv")
