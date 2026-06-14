@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import os
 import time
+import csv
 
 def capture(num_images: int, base_filename: str):
     # pyrefly: ignore [missing-import]
@@ -90,7 +91,7 @@ def xor_process(value):
             shortened ^= val
     return shortened
 
-def generateRandomNumberSet(seed, length: int, fileName: str = "randomNumbers.csv"):
+def generateRandomNumberSet(seed, length: int, fileName: str = "randomNumbers.csv", fieldName: str = None):
     if length <= 0:
         return []
         
@@ -117,8 +118,12 @@ def generateRandomNumberSet(seed, length: int, fileName: str = "randomNumbers.cs
     # esten en el rango [0, 1), aplicamos modulo m antes de dividir por m.
     randomNumbers = [(val % m) / m for val in random_integers]
     
-    # Se exportan los numeros generados a un archivo CSV
+    if fieldName is None:
+        fieldName = os.path.splitext(os.path.basename(fileName))[0]
+        
+    # Se exportan los numeros generados a un archivo CSV con la cabecera correspondiente
     with open(fileName, "w", encoding="utf-8") as f:
+        f.write(f"{fieldName}\n")
         for num in randomNumbers:
             f.write(f"{num}\n")
     
@@ -127,9 +132,23 @@ def generateRandomNumberSet(seed, length: int, fileName: str = "randomNumbers.cs
 def generateRandomNumberFile(fileName):
     capture(5, "imagen")
     result = hashImages()
-    return generateRandomNumberSet(result, 406, fileName=fileName)
+    fieldName = os.path.splitext(os.path.basename(fileName))[0]
+    return generateRandomNumberSet(result, 406, fileName=fileName, fieldName=fieldName)
+
+def combine_csv(file_names: list, output_filename: str = "combined.csv"):
+    files_data = []
+    for name in file_names:
+        with open(name, "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip()]
+            files_data.append(lines)
+            
+    with open(output_filename, "w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        for row in zip(*files_data):
+            writer.writerow(row)
 
 if __name__ == "__main__":
-    generateRandomNumberFile("porcentajeACargar.csv")
-    generateRandomNumberFile("cargaInicial.csv")
-    generateRandomNumberFile("tipoAutonomia.csv")
+    generateRandomNumberFile("porcentajeACargarU.csv")
+    generateRandomNumberFile("cargaInicialU.csv")
+    generateRandomNumberFile("tipoAutonomiaU.csv")
+    combine_csv(["porcentajeACargarU.csv", "cargaInicialU.csv", "tipoAutonomiaU.csv"], "numeros_generados.csv")
